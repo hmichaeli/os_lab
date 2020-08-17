@@ -4,8 +4,10 @@
 #include <linux/ioctl.h>
 
 #define MY_MAGIC 'r'
-#define MY_OP1 _IOW(MY_MAGIC, 0, int)
-
+#define MY_RESTART _IOW(MY_MAGIC, 0, int)
+#define MY_RESET _IOW(MY_MAGIC, 1, int)
+#define MY_SET_OTHER_PID _IOW(MY_MAGIC, 2, int)
+#define MY_SET_DEBUG_PID _IOW(MY_MAGIC, 3, int)
 
 //
 // Function prototypes

@@ -86,6 +86,11 @@ def test():
     #
     # Fork the parent
     #
+
+    ### remove
+    os.write(f, 'The Magic Words are Squeamish Ossifrage')
+    ###
+
     ppid = os.getpid()
     cpid = os.fork()
     if (cpid == 0):

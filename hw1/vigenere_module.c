@@ -30,15 +30,21 @@ struct file_operations my_fops = {
     .ioctl = my_ioctl
 };
 
+/* our globals */
+int other_pid = 0;
+char * buffer_ptr = NULL;
+int read_idx = 0;
+int buffer_size = 0;
 
 int init_module(void)
 {
-    my_major = register_chrdev(my_major, VIGENERE_DEVICE, &my_fops);
+    // my_major = register_chrdev(my_major, VIGENERE_DEVICE, &my_fops);
+    my_major = register_chrdev(0, VIGENERE_DEVICE, &my_fops);
 
     if (my_major < 0)
     {
-	printk(KERN_WARNING "can't get dynamic major\n");
-	return my_major;
+        printk(KERN_WARNING "can't get dynamic major\n");
+        return my_major;
     }
 
     //
@@ -52,6 +58,13 @@ void cleanup_module(void)
 {
     unregister_chrdev(my_major, VIGENERE_DEVICE);
 
+    if (buffer_ptr != NULL){
+        kfree(buffer_ptr);
+    }
+    buffer_ptr = NULL;
+    other_pid = 0;
+    read_idx = 0;
+    buffer_size = 0;
     //
     // do clean_up();
     //
@@ -61,6 +74,8 @@ void cleanup_module(void)
 
 int my_open(struct inode *inode, struct file *filp)
 {
+    // TODO: check if need to do something
+
     return 0;
 }
 
@@ -83,6 +98,28 @@ ssize_t my_write(struct file *filp, const char *buf, size_t count, loff_t *f_pos
 {
     //
     // Do write operation.
+    if (count == 0){
+        return -EFAULT;
+    }
+
+    int cur_pid = current->pid;
+    int code = other_pid + cur_pid;
+    int new_size = buffer_size + count;
+    char * new_buffer_ptr = kalloc(new_size);
+    if (new_buffer_ptr == NULL){
+        return -ENOMEM;
+    }
+    // copy old buffer
+    for(int i=0; i < buffer_size; i++){
+        new_buffer_ptr[i] = buffer_ptr[i];
+    }
+    kfree(buffer_ptr);
+
+    // copy input
+    
+    
+
+    printk("check ~~~");
     return 0; 
 }
 
@@ -102,4 +139,23 @@ int my_ioctl(struct inode *inode, struct file *filp, unsigned int cmd, unsigned 
     }
 
     return 0;
+}
+
+/* help functions */
+
+char encrypt_char(char c, int code){
+    char str[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    int len = 62;
+    int i = 0
+    for (i=0; i<len; i++){
+        if(str[i] == c){
+            break;
+        }
+    }
+    if(i == len){
+        //c not in array
+        return c; 
+    }
+    return str[(i + code) % len];
+
 }

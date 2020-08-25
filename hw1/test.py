@@ -82,7 +82,7 @@ def test():
     # Open the 'vigenere_module' device driver
     #
     f = os.open(DEVICE_PATH, os.O_RDWR)
-    
+    print f
     #
     # Fork the parent
     #
@@ -91,6 +91,18 @@ def test():
     os.write(f, 'The Magic Words are Squeamish Ossifrage')
     ###
 
+    # ##
+    # os.close(f)
+    # f = os.open(DEVICE_PATH, os.O_RDWR)
+    ##
+
+    print len('The Magic Words are Squeamish Ossifrage')
+    s = os.read(f, 100)
+    s = s.decode("ASCII")
+    print len(s)
+    print 'our read: %s\n' % s
+
+    print '---------------------------'
     ppid = os.getpid()
     cpid = os.fork()
     if (cpid == 0):
@@ -144,7 +156,42 @@ def test():
     #
     os.close(f)
 
+
+def test_1():
+    #
+    # Calculate the ioctl cmd number
+    #
+    MY_MAGIC = 'r'
+    MY_SET_OTHER_PID = _IOW(MY_MAGIC, 2, 'int')
+    MY_SET_DEBUG_PID = _IOW(MY_MAGIC, 3, 'int')
+
+    MY_RESTART = _IOW(MY_MAGIC, 0, 'int')
     
+    MY_RESET = _IOW(MY_MAGIC, 1, 'int')
+    #
+    # Open the 'vigenere_module' device driver
+    #
+    f = os.open(DEVICE_PATH, os.O_RDWR)
+    print f
+
+    # fcntl.ioctl(f, MY_SET_DEBUG_PID, 1)
+
+    os.write(f, 'Hello')
+    s0 = os.read(f, 1)
+    s1 = os.read(f, 2)
+
+    fcntl.ioctl(f, MY_RESTART, 1)
+    s2 = os.read(f, 10)
+
+    # fcntl.ioctl(f, MY_RESET, 1) #TODO 
+    s3 = os.read(f, 10)
+
+    os.close(f)
+
+    # fcntl.ioctl(f, MY_SET_DEBUG_PID, 1)
+
 if __name__ == '__main__':
-    test()
+    test_1()
+    # test()
+    
     

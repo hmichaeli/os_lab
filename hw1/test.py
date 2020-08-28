@@ -10,6 +10,7 @@ import errno
 # Globals
 #
 DEVICE_PATH = '/dev/vigenere_device'
+# DEVICE_PATH = '/dev/vigenere_device0'
 
 
 #
@@ -177,21 +178,51 @@ def test_1():
     # fcntl.ioctl(f, MY_SET_DEBUG_PID, 1)
 
     os.write(f, 'Hello')
-    s0 = os.read(f, 1)
+    print('Read s0: \n%s' % os.read(f, 1))
+    # s0 = os.read(f, 1)
+    # print("s0", s0)
     s1 = os.read(f, 2)
+    print("s1", s1)
 
     fcntl.ioctl(f, MY_RESTART, 1)
     s2 = os.read(f, 10)
+    print("s2", s2)
 
     # fcntl.ioctl(f, MY_RESET, 1) #TODO 
     s3 = os.read(f, 10)
+    print("s3", s3)
+    os.write(f, 'Hello123123123123123123123')
+
+    fcntl.ioctl(f, MY_SET_DEBUG_PID, 1)
 
     os.close(f)
+    
+    g = os.open(DEVICE_PATH, os.O_RDWR)
+    print g
+    s4 = os.read(f, 10)
+    print("s4", s4)
+    fcntl.ioctl(g, MY_RESTART, 1)
+    s5 = os.read(g, 10)
+    print("s5", s5)
 
-    # fcntl.ioctl(f, MY_SET_DEBUG_PID, 1)
+def test2():
+    MY_MAGIC = 'r'
+    MY_SET_OTHER_PID = _IOW(MY_MAGIC, 2, 'int')
+    MY_SET_DEBUG_PID = _IOW(MY_MAGIC, 3, 'int')
+    MY_RESTART = _IOW(MY_MAGIC, 0, 'int')
+    MY_RESET = _IOW(MY_MAGIC, 1, 'int')
+    f = os.open(DEVICE_PATH, os.O_RDWR)
+    print f
+    os.read(f, 1)
+    os.write(f, 'Hello')
+    print('Read s0: \n%s' % os.read(f, 1))
+    os.close(f)
+    print('Read s0: \n%s' % os.read(f, 1))
+
+
 
 if __name__ == '__main__':
-    test_1()
+    test2()
     # test()
     
     

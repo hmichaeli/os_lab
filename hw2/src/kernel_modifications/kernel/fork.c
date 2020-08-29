@@ -29,6 +29,11 @@
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 
+/*os-lab - added for todo_stack definition*/
+#include <linux/sched.h>  
+
+/////
+
 /* The idle threads do not count.. */
 int nr_threads;
 
@@ -681,20 +686,20 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	/* os-lab*/
 	printk("fork\n initial todo_stack");
 	INIT_LIST_HEAD(&(p->todo_stack));
-	if(list_empty(current->todo_stack)){
+	if(list_empty(&(current->todo_stack))){
 		printk("current todo stack is empty\n");
 		
 	}
 	else{
+		printk("get current todo stack first element\n");
+		todo_node * cur_node = list_entry(current->todo_stack.next, todo_node, list_node);
 		printk("create new node\n");
 		todo_node * new_node = (todo_node *)kmalloc(sizeof(todo_node), GFP_KERNEL);
-		new_node->description_size = current->description_size;
+		new_node->description_size = cur_node->description_size;
 		new_node->description = (char *)kmalloc(sizeof(char) * new_node->description_size, GFP_KERNEL);
-		memcpy(new_node->description, current->description, sizeof(char) * (new_node->description_size));
+		memcpy(new_node->description, cur_node->description, sizeof(char) * (new_node->description_size));
 		INIT_LIST_HEAD(&(new_node->list_node));
-
 		list_add(&(new_node->list_node), &(p->todo_stack));		
-
 	}
 
 	

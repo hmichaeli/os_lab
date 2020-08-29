@@ -322,8 +322,8 @@ typedef struct prio_array prio_array_t;
 typedef struct _todo_node
 {
 	const char * description;
-	ssize_t description_length;
-	struct list_head node;
+	ssize_t description_size;
+	struct list_head list_node;
 } todo_node;
 
 /* */
@@ -569,9 +569,7 @@ extern struct exec_domain	default_exec_domain;
     blocked:		{{0}},						\
     alloc_lock:		SPIN_LOCK_UNLOCKED,				\
     journal_info:	NULL,						\
-
-	/* os-lab*/
-	todo_stack: LIST_HEAD_INIT(tsk.todo_stack),
+	todo_stack: LIST_HEAD_INIT(tsk.todo_stack), \
 }
 
 

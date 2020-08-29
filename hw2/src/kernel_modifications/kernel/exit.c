@@ -21,6 +21,12 @@
 #include <asm/pgtable.h>
 #include <asm/mmu_context.h>
 
+
+/*os-lab - added for todo_stack definition*/
+#include <linux/sched.h>  
+/////
+
+
 extern void sem_exit (void);
 extern struct task_struct *child_reaper;
 
@@ -487,7 +493,25 @@ static void exit_notify(void)
 
 NORET_TYPE void do_exit(long code)
 {
+	/* os-lab*/
 	//TODO: free todo stack memory
+	printk("do_exit\n");
+	printk("freeing todo_stack memory!!!\n");
+	struct list_head * position, *n;
+	struct list_head * head = &(current->todo_stack);
+	list_for_each_safe( position, n, head) 
+    { 
+		// loop iterating list
+		todo_node * tmp = list_entry(position, todo_node, list_node);
+		list_del(position);
+		kfree(tmp->description);
+		kfree(tmp);
+	}
+	printk("todo stack deleted, is empty: %d\n (need to be not 0)", list_empty(&(current->todo_stack)));
+	/* */
+
+
+
 	struct task_struct *tsk = current;
 
 	if (in_interrupt())

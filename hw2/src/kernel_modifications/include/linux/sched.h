@@ -319,10 +319,14 @@ extern struct user_struct root_user;
 typedef struct prio_array prio_array_t;
 
 /* os-lab */
-struct todo_stack{
-	list_head list;
-};
+typedef struct _todo_node
+{
+	const char * description;
+	ssize_t description_length;
+	struct list_head node;
+} todo_node;
 
+/* */
 struct task_struct {
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care
@@ -458,7 +462,7 @@ struct task_struct {
 	void *journal_info;
 
 /* os-lab */
-	struct todo_stack _todo_stack;
+	struct list_head todo_stack;
 
 };
 
@@ -567,7 +571,7 @@ extern struct exec_domain	default_exec_domain;
     journal_info:	NULL,						\
 
 	/* os-lab*/
-	// _todo_stack: NULL,
+	todo_stack: LIST_HEAD_INIT(tsk.todo_stack),
 }
 
 

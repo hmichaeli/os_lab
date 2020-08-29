@@ -675,6 +675,33 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->tty_old_pgrp = 0;
 	p->times.tms_utime = p->times.tms_stime = 0;
 	p->times.tms_cutime = p->times.tms_cstime = 0;
+
+
+
+	/* os-lab*/
+	printk("fork\n initial todo_stack");
+	INIT_LIST_HEAD(&(p->todo_stack));
+	if(list_empty(current->todo_stack)){
+		printk("current todo stack is empty\n");
+		
+	}
+	else{
+		printk("create new node\n");
+		todo_node * new_node = (todo_node *)kmalloc(sizeof(todo_node), GFP_KERNEL);
+		new_node->description_size = current->description_size;
+		new_node->description = (char *)kmalloc(sizeof(char) * new_node->description_size, GFP_KERNEL);
+		memcpy(new_node->description, current->description, sizeof(char) * (new_node->description_size));
+		INIT_LIST_HEAD(&(new_node->list_node));
+
+		list_add(&(new_node->list_node), &(p->todo_stack));		
+
+	}
+
+	
+	/* */
+
+
+
 #ifdef CONFIG_SMP
 	{
 		int i;

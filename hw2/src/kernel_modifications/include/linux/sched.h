@@ -318,6 +318,11 @@ extern struct user_struct root_user;
 
 typedef struct prio_array prio_array_t;
 
+/* os-lab */
+struct todo_stack{
+	list_head list;
+};
+
 struct task_struct {
 	/*
 	 * offsets of these are hardcoded elsewhere - touch with care
@@ -451,6 +456,10 @@ struct task_struct {
 
 /* journalling filesystem info */
 	void *journal_info;
+
+/* os-lab */
+	struct todo_stack _todo_stack;
+
 };
 
 /*
@@ -556,6 +565,9 @@ extern struct exec_domain	default_exec_domain;
     blocked:		{{0}},						\
     alloc_lock:		SPIN_LOCK_UNLOCKED,				\
     journal_info:	NULL,						\
+
+	/* os-lab*/
+	// _todo_stack: NULL,
 }
 
 

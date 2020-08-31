@@ -1,0 +1,9 @@
+tasks:
+- implement todo stack  - link list mechanism  “include/linux/list.h"
+- add to task_stuck
+    header
+    INIT_TASK
+    do_fork()
+    do_exit() - free memory
+
+- sys calls

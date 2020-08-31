@@ -1,11 +1,17 @@
 #ifndef TODO_API_H
 #define TODO_API_H
 #include <linux/ioctl.h>
+#include <stdio.h>
 
 int push_TODO(pid_t pid, const char *TODO_description, ssize_t description_size){
+    printf("push_TODO API\n");
+    printf("n");
     int res;
-    __asm__
-    (
+    __asm__("movl %%eax,%0;": "=m"(res));
+    printf("%d\n",res);
+    printf("AA\n");
+
+    __asm__(
     "pushl %%eax;"
     "pushl %%ebx;"
     "pushl %%ecx;"
@@ -23,12 +29,14 @@ int push_TODO(pid_t pid, const char *TODO_description, ssize_t description_size)
     : "=m" (res)
     : "m" (pid) ,"m" (TODO_description) ,"m"(description_size)
     );
+    printf("[PUSH_TODO_API] assembly executed\n");
     if (res >= (unsigned long)(-125))
     {
         errno = -res;
         res = -1;
     }
-    return (int) res;
+    printf("[PUSH_TODO_API] return %d\n", res);
+    return  res;
 }
 /*
 a. Description:
@@ -44,7 +52,7 @@ iii. “EFAULT” (Bad address): Error copying from user space.
 iv. “EINVAL” (Invalid argument) TODO_description is NULL or description_size < 1.
 */
 ssize_t peek_TODO(pid_t pid, char *TODO_description, ssize_t description_size){
-    printk("peek_TODO not yet implemented");
+    printf("peek_TODO not yet implemented");
     return 0;
 }
 /*
@@ -64,7 +72,7 @@ iii. “EINVAL” (Invalid argument) The TODO’s stack is empty, TODO_descripti
 description _size < the size of the description of the top-most TODO.
 */
 int pop_TODO(pid_t pid){
-    printk("pop_TODO not yet implemented");
+    printf("pop_TODO not yet implemented");
     return 0;
 }
 /*

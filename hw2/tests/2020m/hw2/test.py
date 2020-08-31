@@ -2,19 +2,24 @@
 
 import os
 import pyTodoTasks
+print("imports don")
 
 def test1():
+	print("test1:")
 	"""simple test to invoke the TODO syscalls."""
 
         pid = os.getpid()
-        
+       	print("pid: ", pid) 
         #
         # Calling system api's.
         #
-        pyTodoTasks.push_TODO(pid, "test1")
-        pyTodoTasks.peek_TODO(pid, 100)
-        pyTodoTasks.pop_TODO(pid)
-
+        print("push")
+	pyTodoTasks.push_TODO(pid, "test1")
+        print("peek")
+	pyTodoTasks.peek_TODO(pid, 100)
+        print("POP")
+	pyTodoTasks.pop_TODO(pid)
+	print("done")
 def test2():
 	"""Verify simple self TODO task."""
         pid = os.getpid()

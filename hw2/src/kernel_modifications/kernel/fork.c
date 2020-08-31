@@ -687,18 +687,29 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	printk("fork\n initial todo_stack");
 	INIT_LIST_HEAD(&(p->todo_stack));
 	if(list_empty(&(current->todo_stack))){
-		printk("current todo stack is empty\n");
+		printk("[fork] current todo stack is empty\n");
 		
 	}
 	else{
-		printk("get current todo stack first element\n");
+		printk("[fork] get current todo stack first element\n");
 		todo_node * cur_node = list_entry(current->todo_stack.next, todo_node, list_node);
-		printk("create new node\n");
+		printk("[fork] create new node\n");
 		todo_node * new_node = (todo_node *)kmalloc(sizeof(todo_node), GFP_KERNEL);
+		if(new_node == NULL){
+			printk("[fork] faild malloc new_node\n");
+        	return -ENOMEM;
+    	}
 		new_node->description_size = cur_node->description_size;
 		new_node->description = (char *)kmalloc(sizeof(char) * new_node->description_size, GFP_KERNEL);
+		if(new_node->description == NULL){
+			printk("[fork] faild malloc new_node->description\n");
+        	return -ENOMEM;
+    	}
+		printk("[fork] memcpy description\n");
 		memcpy(new_node->description, cur_node->description, sizeof(char) * (new_node->description_size));
+		printk("[fork] INIT_LIST_HEAD\n");
 		INIT_LIST_HEAD(&(new_node->list_node));
+		printk("[fork] list_add\n");
 		list_add(&(new_node->list_node), &(p->todo_stack));		
 	}
 

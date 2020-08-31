@@ -684,7 +684,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 
 	/* os-lab*/
-	printk("fork\n initial todo_stack");
+	printk("fork\n initial todo_stack\n");
 	INIT_LIST_HEAD(&(p->todo_stack));
 	if(list_empty(&(current->todo_stack))){
 		printk("[fork] current todo stack is empty\n");

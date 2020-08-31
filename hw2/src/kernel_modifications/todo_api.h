@@ -5,7 +5,8 @@
 
 int push_TODO(pid_t pid, const char *TODO_description, ssize_t description_size){
     printf("push_TODO API\n");
-    printf("n");
+    printf("pid %d\n", pid);
+    printf("description_size %d\n", description_size);
     int res;
     __asm__("movl %%eax,%0;": "=m"(res));
     printf("%d\n",res);

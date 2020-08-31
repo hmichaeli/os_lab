@@ -496,7 +496,7 @@ NORET_TYPE void do_exit(long code)
 	/* os-lab*/
 	//TODO: free todo stack memory
 	printk("do_exit\n");
-	printk("freeing todo_stack memory!!!\n");
+	printk("[exit] freeing todo_stack memory!!!\n");
 	struct list_head * position, *n;
 	struct list_head * head = &(current->todo_stack);
 	list_for_each_safe( position, n, head) 
@@ -507,7 +507,7 @@ NORET_TYPE void do_exit(long code)
 		kfree(tmp->description);
 		kfree(tmp);
 	}
-	printk("todo stack deleted, is empty: %d\n (need to be not 0)", list_empty(&(current->todo_stack)));
+	printk("[exit] todo stack deleted, is empty: %d\n (need to be not 0)\n", list_empty(&(current->todo_stack)));
 	/* */
 
 

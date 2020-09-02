@@ -2,23 +2,10 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 
-int sys_push_TODO(void){
+#define MIN(x,y) ((x)<(y)?(x):(y))
 
-    // __asm__
-    // (
-    // "movl %%ebx, %0;"
-    // "movl %%ecx, %1;"
-    // "movl %%edx, %1;"
-    // :"m" (pid) ,"m" (message) ,"m"(message_size)
-    // );
-    pid_t pid;
-    const char * message;
-    ssize_t message_size;
-    printk("insert regiseters to vars:\n");
-    __asm__("movl %%ebx,%0" : "=m"(pid));
-    __asm__("movl %%ecx,%0" : "=m"(message));
-    __asm__("movl %%edx,%0" : "=m"(message_size));
-    printk("insert regiseters to vars - done\n");
+int sys_push_TODO(pid_t pid, char* message, int message_size)
+{
     printk("get task struce from pid\n");
     struct task_struct * p = find_task_by_pid(pid);
     printk("[sys_push_TODO] pid: %d\n", pid);
@@ -52,6 +39,88 @@ int sys_push_TODO(void){
     int res = 0;
     printk("[sys_push_TODO] return res = 0\n");
     return res;
-    // __asm__("movl %0, %%eax;":"=m"(res));
+ 
+}
 
+
+int sys_peek_TODO(pid_t pid, char* message, int message_size)
+{
+    printk("get task struce from pid\n");
+    struct task_struct * p = find_task_by_pid(pid);
+    printk("[sys_peek_TODO] pid: %d\n", pid);
+    // printk("[sys_push_TODO] message: %s\n", *message);
+    printk("[sys_peek_TODO] message_size: %d\n", message_size);
+
+    if (p == NULL){
+        printk("[sys_peek_TODO] faild find_task_by_pid\n");
+        return -ESRCH;
+    }
+
+
+	if(list_empty(&(p->todo_stack))){
+		printk("[sys_peek_TODO] pid todo stack is empty\n");
+		return -EINVAL;
+	}
+	else{
+		printk("[sys_peek_TODO] get p todo stack first element\n");
+		todo_node * cur_node = list_entry(p->todo_stack.next, todo_node, list_node);
+		
+        if (cur_node->description_size > message_size){
+    		printk("[sys_peek_TODO] message size is too long\n");
+    		return -EINVAL;
+
+        }
+        printk("[sys_peek_TODO] copy to user:");
+        if (cur_node->description == NULL){
+            printk("[sys_peek_TODO] description is NULL\n");
+    		return -EINVAL;
+        }
+        if (message == NULL){
+            printk("[sys_peek_TODO] message is NULL\n");
+    		return -EINVAL;
+        }
+        int res = copy_to_user(message, cur_node->description, cur_node->description_size);
+        if (res != 0){
+            printk("[sys_peek_TODO] copy_to_user failed");
+            return -EFAULT;
+        }
+        return cur_node->description_size;
+	}
+}
+
+
+int sys_pop_TODO(pid_t pid)
+{
+    printk("get task struce from pid\n");
+    struct task_struct * p = find_task_by_pid(pid);
+    printk("[sys_pop_TODO] pid: %d\n", pid);
+    // printk("[sys_push_TODO] message: %s\n", *message);
+
+    if (p == NULL){
+        printk("[sys_pop_TODO] faild find_task_by_pid\n");
+        return -ESRCH;
+    }
+    
+	if(list_empty(&(p->todo_stack))){
+		printk("[sys_pop_TODO] pid todo stack is empty\n");
+		return -EINVAL;
+	}
+
+    if (p->todo_stack.next == NULL){
+        printk("[sys_pop_TODO] todo_stack.next is NULL\n");
+		return -EINVAL;
+    }
+    
+    printk("[sys_pop_TODO] remove TODO from top of the list\n");
+    todo_node * tmp = list_entry(p->todo_stack.next, todo_node, list_node);
+    list_del(p->todo_stack.next);
+    
+    printk("[sys_pop_TODO] free memory\n");
+    kfree(tmp->description);
+    kfree(tmp);
+
+    int res = 0;
+    printk("[sys_push_TODO] return res = 0\n");
+    return res;
+ 
 }

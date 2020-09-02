@@ -53,9 +53,42 @@ iii. “EFAULT” (Bad address): Error copying from user space.
 iv. “EINVAL” (Invalid argument) TODO_description is NULL or description_size < 1.
 */
 ssize_t peek_TODO(pid_t pid, char *TODO_description, ssize_t description_size){
-    printf("peek_TODO not yet implemented");
-    return 0;
+    printf("peekh_TODO API\n");
+    printf("pid %d\n", pid);
+    printf("description_size %d\n", description_size);
+    int res;
+    __asm__("movl %%eax,%0;": "=m"(res));
+    printf("%d\n",res);
+    printf("AA\n");
+
+    __asm__(
+    "pushl %%eax;"
+    "pushl %%ebx;"
+    "pushl %%ecx;"
+    "pushl %%edx;"
+    "movl $244, %%eax;"
+    "movl %1, %%ebx;"
+    "movl %2, %%ecx;"
+    "movl %3, %%edx;"
+    "int $0x80;"
+    "movl %%eax,%0;"
+    "popl %%edx;"
+    "popl %%ecx;"
+    "popl %%ebx;"
+    "popl %%eax;"
+    : "=m" (res)
+    : "m" (pid) ,"m" (TODO_description) ,"m"(description_size)
+    );
+    printf("[PEEK_TODO_API] assembly executed\n");
+    if (res >= (unsigned long)(-125))
+    {
+        errno = -res;
+        res = -1;
+    }
+    printf("[PEEK_TODO_API] return %d\n", res);
+    return  res;
 }
+
 /*
 a. Description:
 Get the description of TODO at the top of the TODO’s stack of process pid. The description is
@@ -73,8 +106,33 @@ iii. “EINVAL” (Invalid argument) The TODO’s stack is empty, TODO_descripti
 description _size < the size of the description of the top-most TODO.
 */
 int pop_TODO(pid_t pid){
-    printf("pop_TODO not yet implemented");
-    return 0;
+    printf("pop_TODO API\n");
+    printf("pid %d\n", pid);
+    int res;
+    __asm__("movl %%eax,%0;": "=m"(res));
+    printf("%d\n",res);
+    printf("AA\n");
+
+    __asm__(
+    "pushl %%eax;"
+    "pushl %%ebx;"
+    "movl $245, %%eax;"
+    "movl %1, %%ebx;"
+    "int $0x80;"
+    "movl %%eax,%0;"
+    "popl %%ebx;"
+    "popl %%eax;"
+    : "=m" (res)
+    : "m" (pid) 
+    );
+    printf("[POP_TODO_API] assembly executed\n");
+    if (res >= (unsigned long)(-125))
+    {
+        errno = -res;
+        res = -1;
+    }
+    printf("[POP_TODO_API] return %d\n", res);
+    return  res;
 }
 /*
 a. Description:

@@ -651,7 +651,10 @@ ENTRY(sys_call_table)
 	.long SYMBOL_NAME(sys_sched_getaffinity)
 
 	.long SYMBOL_NAME(sys_push_TODO)              /* 243 simple sample syscall  */
-	
+	.long SYMBOL_NAME(sys_peek_TODO)   
+	.long SYMBOL_NAME(sys_pop_TODO)  
+
+
 	/*TODO: add todo syscalls*/
 	
 	.rept NR_syscalls-(.-sys_call_table)/4

@@ -4,13 +4,13 @@
 #include <stdio.h>
 
 int push_TODO(pid_t pid, const char *TODO_description, ssize_t description_size){
-    printf("push_TODO API\n");
-    printf("pid %d\n", pid);
-    printf("description_size %d\n", description_size);
+    // printf("push_TODO API\n");
+    // printf("pid %d\n", pid);
+    // printf("description_size %d\n", description_size);
     int res;
-    __asm__("movl %%eax,%0;": "=m"(res));
-    printf("%d\n",res);
-    printf("AA\n");
+    // __asm__("movl %%eax,%0;": "=m"(res));
+    // printf("%d\n",res);
+    // printf("AA\n");
 
     __asm__(
     "pushl %%eax;"
@@ -30,13 +30,13 @@ int push_TODO(pid_t pid, const char *TODO_description, ssize_t description_size)
     : "=m" (res)
     : "m" (pid) ,"m" (TODO_description) ,"m"(description_size)
     );
-    printf("[PUSH_TODO_API] assembly executed\n");
+    // printf("[PUSH_TODO_API] assembly executed\n");
     if (res >= (unsigned long)(-125))
     {
         errno = -res;
         res = -1;
     }
-    printf("[PUSH_TODO_API] return %d\n", res);
+    // printf("[PUSH_TODO_API] return %d\n", res);
     return  res;
 }
 /*
@@ -53,13 +53,13 @@ iii. “EFAULT” (Bad address): Error copying from user space.
 iv. “EINVAL” (Invalid argument) TODO_description is NULL or description_size < 1.
 */
 ssize_t peek_TODO(pid_t pid, char *TODO_description, ssize_t description_size){
-    printf("peekh_TODO API\n");
-    printf("pid %d\n", pid);
-    printf("description_size %d\n", description_size);
+    // printf("peekh_TODO API\n");
+    // printf("pid %d\n", pid);
+    // printf("description_size %d\n", description_size);
     int res;
-    __asm__("movl %%eax,%0;": "=m"(res));
-    printf("%d\n",res);
-    printf("AA\n");
+    // __asm__("movl %%eax,%0;": "=m"(res));
+    // printf("%d\n",res);
+    // printf("AA\n");
 
     __asm__(
     "pushl %%eax;"
@@ -79,13 +79,13 @@ ssize_t peek_TODO(pid_t pid, char *TODO_description, ssize_t description_size){
     : "=m" (res)
     : "m" (pid) ,"m" (TODO_description) ,"m"(description_size)
     );
-    printf("[PEEK_TODO_API] assembly executed\n");
+    // printf("[PEEK_TODO_API] assembly executed\n");
     if (res >= (unsigned long)(-125))
     {
         errno = -res;
         res = -1;
     }
-    printf("[PEEK_TODO_API] return %d\n", res);
+    // printf("[PEEK_TODO_API] return %d\n", res);
     return  res;
 }
 
@@ -106,12 +106,12 @@ iii. “EINVAL” (Invalid argument) The TODO’s stack is empty, TODO_descripti
 description _size < the size of the description of the top-most TODO.
 */
 int pop_TODO(pid_t pid){
-    printf("pop_TODO API\n");
-    printf("pid %d\n", pid);
+    // printf("pop_TODO API\n");
+    // printf("pid %d\n", pid);
     int res;
-    __asm__("movl %%eax,%0;": "=m"(res));
-    printf("%d\n",res);
-    printf("AA\n");
+    // __asm__("movl %%eax,%0;": "=m"(res));
+    // printf("%d\n",res);
+    // printf("AA\n");
 
     __asm__(
     "pushl %%eax;"
@@ -125,13 +125,13 @@ int pop_TODO(pid_t pid){
     : "=m" (res)
     : "m" (pid) 
     );
-    printf("[POP_TODO_API] assembly executed\n");
+    // printf("[POP_TODO_API] assembly executed\n");
     if (res >= (unsigned long)(-125))
     {
         errno = -res;
         res = -1;
     }
-    printf("[POP_TODO_API] return %d\n", res);
+    // printf("[POP_TODO_API] return %d\n", res);
     return  res;
 }
 /*

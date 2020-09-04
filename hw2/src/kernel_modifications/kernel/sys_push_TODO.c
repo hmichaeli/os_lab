@@ -4,6 +4,38 @@
 
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
+
+int check_ancestor(pid_t pid){
+    pid_t cur_pid = current->pid;
+    printk("[check_ancestor] pid:     %d\n", pid);
+    printk("[check_ancestor] cur_pid: %d\n", cur_pid);
+    if (pid == cur_pid){
+        printk("[check_ancestor][OK] self pid return 0");
+        return 0;
+    }
+    struct task_struct * pts = find_task_by_pid(pid);
+    // if (p == NULL){
+    //     printk("[sys_push_TODO] faild find_task_by_pid\n");
+    //     return -1;
+    // }
+
+    while(pts != NULL && pts->pid != 1){
+        if (pts->pid == cur_pid){
+            printk("[check_ancestor][OK] ancestor pid return 0");
+            return 0;
+        }
+        pts = pts->p_opptr;
+    }
+    if(pts == NULL){
+        printk("[check_ancestor] pts is NULL - return -1");
+    }
+    if(pts->pid == 1){
+        printk("[check_ancestor] pts->pid is 1 - return -1");
+    }
+    return -1;
+}
+
+
 int sys_push_TODO(pid_t pid, char* message, int message_size)
 {
     printk("get task struce from pid\n");
@@ -14,8 +46,14 @@ int sys_push_TODO(pid_t pid, char* message, int message_size)
 
     if (p == NULL){
         printk("[sys_push_TODO] faild find_task_by_pid\n");
-        return -ENOMEM;
+        return -ESRCH;
     }
+
+    if(check_ancestor(pid) != 0){
+        printk("[sys_push_TODO] illegal pid\n");
+        return -ESRCH;     
+    }
+
     printk("create new todo node\n");
     todo_node * new_node = (todo_node *)kmalloc(sizeof(todo_node), GFP_KERNEL);
     if(new_node == NULL){
@@ -56,6 +94,11 @@ int sys_peek_TODO(pid_t pid, char* message, int message_size)
         return -ESRCH;
     }
 
+    if(check_ancestor(pid) != 0){
+        printk("[sys_peek_TODO] illegal pid\n");
+        return -ESRCH;     
+    }
+
 
 	if(list_empty(&(p->todo_stack))){
 		printk("[sys_peek_TODO] pid todo stack is empty\n");
@@ -73,7 +116,7 @@ int sys_peek_TODO(pid_t pid, char* message, int message_size)
         printk("[sys_peek_TODO] copy to user:");
         if (cur_node->description == NULL){
             printk("[sys_peek_TODO] description is NULL\n");
-    		return -EINVAL;
+    		return -EFAULT;
         }
         if (message == NULL){
             printk("[sys_peek_TODO] message is NULL\n");
@@ -100,6 +143,12 @@ int sys_pop_TODO(pid_t pid)
         printk("[sys_pop_TODO] faild find_task_by_pid\n");
         return -ESRCH;
     }
+    
+    if(check_ancestor(pid) != 0){
+        printk("[sys_pop_TODO] illegal pid\n");
+        return -ESRCH;     
+    }
+
     
 	if(list_empty(&(p->todo_stack))){
 		printk("[sys_pop_TODO] pid todo stack is empty\n");

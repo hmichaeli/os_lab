@@ -494,7 +494,7 @@ static void exit_notify(void)
 NORET_TYPE void do_exit(long code)
 {
 	/* os-lab*/
-	//TODO: free todo stack memory
+	//free todo stack memory
 	printk("do_exit\n");
 	printk("[exit] freeing todo_stack memory!!!\n");
 	struct list_head * position, *n;

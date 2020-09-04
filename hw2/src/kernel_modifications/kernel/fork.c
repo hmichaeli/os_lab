@@ -684,13 +684,14 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 
 	/* os-lab*/
+	// initialize todo stack as list in the task struct
 	printk("fork\n initial todo_stack\n");
 	INIT_LIST_HEAD(&(p->todo_stack));
-	if(list_empty(&(current->todo_stack))){
+	if(list_empty(&(current->todo_stack))){ // current to do stack is empty, no need to copy any task
 		printk("[fork] current todo stack is empty\n");
 		
 	}
-	else{
+	else{ //todo stack isn't empty. copy the first todo node to the new process.
 		printk("[fork] get current todo stack first element\n");
 		todo_node * cur_node = list_entry(current->todo_stack.next, todo_node, list_node);
 		printk("[fork] create new node\n");

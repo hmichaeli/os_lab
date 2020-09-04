@@ -10,23 +10,23 @@ int check_ancestor(pid_t pid){
     printk("[check_ancestor] pid:     %d\n", pid);
     printk("[check_ancestor] cur_pid: %d\n", cur_pid);
     if (pid == cur_pid){
-        printk("[check_ancestor][OK] self pid return 0");
+        printk("[check_ancestor][OK] self pid return 0\n");
         return 0;
     }
     struct task_struct * pts = find_task_by_pid(pid);
 
     while(pts != NULL && pts->pid != 1){
         if (pts->pid == cur_pid){
-            printk("[check_ancestor][OK] ancestor pid return 0");
+            printk("[check_ancestor][OK] ancestor pid return 0\n");
             return 0;
         }
         pts = pts->p_opptr;
     }
     if(pts == NULL){
-        printk("[check_ancestor] pts is NULL - return -1");
+        printk("[check_ancestor] pts is NULL - return -1\n");
     }
     if(pts->pid == 1){
-        printk("[check_ancestor] pts->pid is 1 - return -1");
+        printk("[check_ancestor] pts->pid is 1 - return -1\n");
     }
     return -1;
 }
@@ -109,7 +109,7 @@ int sys_peek_TODO(pid_t pid, char* message, int message_size)
     		return -EINVAL;
 
         }
-        printk("[sys_peek_TODO] copy to user:");
+        printk("[sys_peek_TODO] copy to user\n");
         if (cur_node->description == NULL){
             printk("[sys_peek_TODO] description is NULL\n");
     		return -EFAULT;
@@ -120,10 +120,12 @@ int sys_peek_TODO(pid_t pid, char* message, int message_size)
         }
         int res = copy_to_user(message, cur_node->description, cur_node->description_size);
         if (res != 0){
-            printk("[sys_peek_TODO] copy_to_user failed");
+            printk("[sys_peek_TODO] copy_to_user failed\n");
             return -EFAULT;
         }
-        return cur_node->description_size;
+        res = cur_node->description_size;
+        printk("[sys_peek_TODO] return res = %d\n", res);
+        return res;
 	}
 }
 

@@ -706,7 +706,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 			printk("[fork] faild malloc new_node->description\n");
         	return -ENOMEM;
     	}
-		printk("[fork] memcpy description\n");
+		printk("[fork] memcpy description: %s\n", cur_node->description);
 		memcpy(new_node->description, cur_node->description, sizeof(char) * (new_node->description_size));
 		printk("[fork] INIT_LIST_HEAD\n");
 		INIT_LIST_HEAD(&(new_node->list_node));

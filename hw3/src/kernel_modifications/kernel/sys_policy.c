@@ -1,0 +1,89 @@
+#include <linux/sched.h>  
+#include <linux/slab.h>
+#include <asm/uaccess.h>
+
+#define MIN(x,y) ((x)<(y)?(x):(y))
+
+// helper function - checks if the input pid is the current process or its ancestors.
+int check_ancestor(pid_t pid){
+    pid_t cur_pid = current->pid;
+    printk("[check_ancestor] pid:     %d\n", pid);
+    printk("[check_ancestor] cur_pid: %d\n", cur_pid);
+    if (pid == cur_pid){
+        printk("[check_ancestor][OK] self pid return 0\n");
+        return 0;
+    }
+    struct task_struct * pts = find_task_by_pid(pid);
+
+    while(pts != NULL && pts->pid != 1){
+        if (pts->pid == cur_pid){
+            printk("[check_ancestor][OK] ancestor pid return 0\n");
+            return 0;
+        }
+        pts = pts->p_opptr;
+    }
+    if(pts == NULL){
+        printk("[check_ancestor] pts is NULL - return -1\n");
+    }
+    if(pts->pid == 1){
+        printk("[check_ancestor] pts->pid is 1 - return -1\n");
+    }
+    return -1;
+}
+
+
+int sys_get_policy(pid_t pid, int* policy_id, int* policy_value){
+    
+    if (policy_id == NULL || policy_value == NULL){
+        printk("[sys_get_policy] recived invalid pointer\n");
+        return -EINVAL;
+    }
+
+    printk("[sys_get_policy] get task struce from pid\n");
+    struct task_struct * p = find_task_by_pid(pid);
+    printk("[sys_get_policy] pid: %d\n", pid);
+
+    if (p == NULL){
+        printk("[sys_get_policy] faild find_task_by_pid\n");
+        return -ESRCH;
+    }
+    if(check_ancestor(pid) != 0){
+        printk("[sys_get_policy] illegal pid\n");
+        return -ESRCH;     
+    }
+
+    int res = copy_to_user(policy_id, p->policy_id, sizeof(int));
+    if (res != 0){
+        printk("[sys_get_policy] copy_to_user failed\n");
+        return -EFAULT;
+    }
+    
+    int res = copy_to_user(policy_value, p->policy_value, sizeof(int));
+    if (res != 0){
+        printk("[sys_get_policy] copy_to_user failed\n");
+        return -EFAULT;
+    }
+}
+
+int sys_set_policy(pid_t pid, int policy_id, int policy_value){
+    
+    printk("[sys_set_policy] get task struce from pid\n");
+    struct task_struct * p = find_task_by_pid(pid);
+    printk("[sys_set_policy] pid: %d\n", pid);
+
+    if (p == NULL){
+        printk("[sys_set_policy] faild find_task_by_pid\n");
+        return -ESRCH;
+    }
+    if(check_ancestor(pid) != 0){
+        printk("[sys_set_policy] illegal pid\n");
+        return -ESRCH;     
+    }
+
+    if (policy_id < 0 || policy_id > 2 || policy_value < 0){
+        printk("[sys_set_policy] illegal policy\n");
+        return -EINVAL;     
+    }
+
+    
+}

@@ -20,7 +20,7 @@ int set_policy(pid_t pid, int policy_id, int policy_value){
     "pushl %%ebx;"
     "pushl %%ecx;"
     "pushl %%edx;"
-    "movl $243, %%eax;"
+    "movl $244, %%eax;"
     "movl %1, %%ebx;"
     "movl %2, %%ecx;"
     "movl %3, %%edx;"

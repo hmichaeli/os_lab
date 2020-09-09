@@ -2,7 +2,13 @@
 #include <linux/slab.h>
 #include <asm/uaccess.h>
 
+# include <linux/timer.h>
+
 #define MIN(x,y) ((x)<(y)?(x):(y))
+
+//
+
+static struct timer_list timers;
 
 // helper function - checks if the input pid is the current process or its ancestors.
 int check_ancestor(pid_t pid){
@@ -31,7 +37,11 @@ int check_ancestor(pid_t pid){
     return -1;
 }
 
+unsigned long sec_to_jiffy(int seconds){
+    return (unsigned long)(seconds * HZ);
+}
 
+// sys_call handlers
 int sys_get_policy(pid_t pid, int* policy_id, int* policy_value){
     
     if (policy_id == NULL || policy_value == NULL){
@@ -52,17 +62,18 @@ int sys_get_policy(pid_t pid, int* policy_id, int* policy_value){
         return -ESRCH;     
     }
 
-    int res = copy_to_user(policy_id, p->policy_id, sizeof(int));
+    int res = copy_to_user(policy_id, &(p->policy_id), sizeof(int));
     if (res != 0){
         printk("[sys_get_policy] copy_to_user failed\n");
         return -EFAULT;
     }
     
-    int res = copy_to_user(policy_value, p->policy_value, sizeof(int));
+    res = copy_to_user(policy_value, &(p->policy_value), sizeof(int));
     if (res != 0){
         printk("[sys_get_policy] copy_to_user failed\n");
         return -EFAULT;
     }
+    return 0;
 }
 
 int sys_set_policy(pid_t pid, int policy_id, int policy_value){
@@ -85,5 +96,26 @@ int sys_set_policy(pid_t pid, int policy_id, int policy_value){
         return -EINVAL;     
     }
 
-    
+    printk("[sys_set_policy] set policy: %d, value: %d in process: %d  task_struct \n", policy_id, policy_value, pid);
+    p->policy_id = policy_id;
+    p->policy_value = policy_value;
+
+    signed long jif_time = sec_to_jiffy(policy_value);
+    printk("[sys_set_policy] policy_value: [seconds]: %d, [jiffy]: %d\n", policy_value, jif_time);
+    // Handle set_policy curent process
+    if (pid == current->pid){
+        printk("[sys_set_policy] pid == current->pid\n");
+        if (policy_id == 1){
+            set_current_state(TASK_INTERRUPTIBLE);
+            printk("[sys_set_policy] schedule_timeout\n");
+            schedule_timeout(jif_time);
+            return 0;
+        }
+        if (policy_id == 2){
+            
+        }
+    }
+
 }
+
+

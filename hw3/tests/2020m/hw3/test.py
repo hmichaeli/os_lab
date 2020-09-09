@@ -3,6 +3,7 @@
 import os
 import time
 import pyPolicy
+import time
 
 def test_sleep():
 	"""Verify sleep."""
@@ -29,8 +30,18 @@ def test_sleep():
 	end_time = int(time.time())
 	assert (end_time-start_time > 10)
         assert (end_time-start_time < 20)
-	
+
+def test1():
+    pid = os.getpid()
+    print("pid: ",pid)
+    date_time = time.localtime()
+    print("date and time:",date_time)	
+    pyPolicy.set_policy(pid, 1, 10)
+    date_time = time.localtime()
+    print("date and time:",date_time)	
+
 if __name__ == "__main__":
-    test_sleep()
+   test1()
+   # test_sleep()
 
 

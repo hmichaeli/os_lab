@@ -8,7 +8,7 @@ import os
 from hwgrader import *
 
 
-SRC_PATH = r'/mnt/hgfs/Shared/kernel_modifications'
+SRC_PATH = r'/mnt/hgfs/shared_folder/os_lab/hw3/src/kernel_modifications'
 TEMP_FILES_FOLDER = os.path.expanduser('~/temp_make')
 CUSTOM_KERNEL_PATH = '/usr/src/linux-2.4.18-14custom'
 CUSTOM_KERNEL_BAKCUP_PATH = os.path.join(TEMP_FILES_FOLDER, os.path.split(CUSTOM_KERNEL_PATH)[-1])

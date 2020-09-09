@@ -562,11 +562,10 @@ extern struct exec_domain	default_exec_domain;
     blocked:		{{0}},						\
     alloc_lock:		SPIN_LOCK_UNLOCKED,				\
     journal_info:	NULL,						\
-
 	policy_id: 		0,							\
-	policy_value: 	0,				\
-
+	policy_value: 	0, 						\				
 }
+
 
 
 #ifndef INIT_TASK_SIZE

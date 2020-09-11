@@ -41,6 +41,15 @@ unsigned long sec_to_jiffy(int seconds){
     return (unsigned long)(seconds * HZ);
 }
 
+void wake_up_policy(){
+    pid_t pid = current->pid;
+    printk("[wake_up] pid: %d\n", pid);
+    printk("[wake_up] set task = RUNNING: \n");
+    current->state = TASK_RUNNING;
+    printk("[wake_up] schedule: \n");
+    schedule();
+}
+
 // sys_call handlers
 int sys_get_policy(pid_t pid, int* policy_id, int* policy_value){
     
@@ -109,10 +118,28 @@ int sys_set_policy(pid_t pid, int policy_id, int policy_value){
             set_current_state(TASK_INTERRUPTIBLE);
             printk("[sys_set_policy] schedule_timeout\n");
             schedule_timeout(jif_time);
+            printk("[sys_set_policy] retrun 0 \n");
             return 0;
         }
         if (policy_id == 2){
+        
+        }
+    }
+    // Handle set_policy to other process
+    else{
+        printk("[sys_set_policy] pid != current->pid\n");
+        if (policy_id == 1){
+            printk("[sys_set_policy] set p state to TASK_INTERRUPTIBLE\n");
+            p->state = TASK_INTERRUPTIBLE;
+            printk("[sys_set_policy] set wake_up timer\n");
             
+            p->real_timer.expires = jiffies + jif_time;
+            p->real_timer.data = 0;
+            p->real_timer .function = wake_up_policy;
+            printk("[sys_set_policy] set wake_up timer\n");
+            add_timer(&(p->real_timer));
+            printk("[sys_set_policy] retrun 0 \n");
+            return 0;
         }
     }
 

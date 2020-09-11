@@ -40,8 +40,35 @@ def test1():
     date_time = time.localtime()
     print("date and time:",date_time)	
 
+def test2():
+    pid = os.getpid()
+    print("[parent] pid: ", pid)
+    cpid = os.fork()
+    if (cpid == 0):
+        pid = os.getpid()
+        print("[child] pid: ", pid)
+    # In child, spin for 2-3 seconds before exiting
+        for i in range(20):
+            date_time = time.localtime()
+            print("[child] date and time:",date_time)
+            for k in xrange(12000000):
+                pass
+
+        os._exit(0)
+    else:
+        time.sleep(3)
+        date_time = time.localtime()
+        print("[parent] set child policy date and time:",date_time)
+        pyPolicy.set_policy(cpid, 1, 5)
+    	# print("[parent] wait:",date_time)
+        time.sleep(20)
+    	print("[parent] kill child:",date_time)
+        kill(cpid, 9)
+    	print("[parent] done:",date_time)
+
 if __name__ == "__main__":
-   test1()
+#    test1()
+    test2()
    # test_sleep()
 
 

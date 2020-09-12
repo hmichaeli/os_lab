@@ -455,6 +455,10 @@ struct task_struct {
 /* os-lab */
 	int policy_id;
 	int policy_value;
+	int active_policy; // is current policy active
+
+	int pending_policy_id;
+	int pending_policy_value;
 
 
 };

@@ -679,7 +679,12 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->policy_id = current->policy_id;
 	p->policy_value = current->policy_value;
 
-	// TODO: execute policy
+	int active_policy = 1 ; // is current policy active
+	// TODO: execute policies if needed 
+
+	int pending_policy_id = -1;
+	int pending_policy_value = -1;
+	
 
 
 #ifdef CONFIG_SMP

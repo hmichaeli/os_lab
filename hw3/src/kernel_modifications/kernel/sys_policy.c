@@ -6,6 +6,8 @@
 
 #include <linux/signal.h>
 
+#include <linux/sys_policy.h>
+
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
 //
@@ -13,8 +15,8 @@
 static struct timer_list timers;
 
 // help functions titles
-int set_sleep_policy(struct task_struct * p, int time);
-int set_kill_policy(struct task_struct * p, int time);
+// int set_sleep_policy(struct task_struct * p, int time);
+// int set_kill_policy(struct task_struct * p, int time);
 
 // helper function - checks if the input pid is the current process or its ancestors.
 int check_ancestor(pid_t pid){
@@ -77,6 +79,7 @@ void wake_up_policy(unsigned long  data){
         printk("[wake_up] change active_policy to 0\n");
         p->active_policy = 0;
     }
+    printk("[wake_up] done. policy_id: %d policy_value: %d\n", p->policy_id, p->policy_value);
 
 }
 

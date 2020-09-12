@@ -29,6 +29,11 @@
 #include <asm/uaccess.h>
 #include <asm/mmu_context.h>
 
+
+/* os-lab */
+#include <linux/sys_policy.h>
+
+
 /* The idle threads do not count.. */
 int nr_threads;
 
@@ -675,7 +680,7 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 	p->times.tms_utime = p->times.tms_stime = 0;
 	p->times.tms_cutime = p->times.tms_cstime = 0;
 
-	/* os-lab */
+	/* < os-lab */
 	p->policy_id = current->policy_id;
 	p->policy_value = current->policy_value;
 
@@ -684,8 +689,16 @@ int do_fork(unsigned long clone_flags, unsigned long stack_start,
 
 	int pending_policy_id = -1;
 	int pending_policy_value = -1;
-	
-
+	printk("[do_fork] process %d initialized with policy %d\n", p->pid, p->policy_id);
+	if (p->policy_id == 1){
+		printk("[do_fork] call set_sleep_policy\n");
+		set_sleep_policy(p, p->policy_value);
+	}
+	else if (p->policy_id == 2){
+		printk("[do_fork] call set_kill_policy\n");
+		set_kill_policy(p, p->policy_value);
+	}
+	/* os-lab >  */
 
 #ifdef CONFIG_SMP
 	{

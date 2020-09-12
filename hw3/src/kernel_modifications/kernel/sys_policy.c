@@ -4,6 +4,8 @@
 
 # include <linux/timer.h>
 
+#include <linux/signal.h>
+
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
 //
@@ -41,13 +43,36 @@ unsigned long sec_to_jiffy(int seconds){
     return (unsigned long)(seconds * HZ);
 }
 
-void wake_up_policy(){
-    pid_t pid = current->pid;
-    printk("[wake_up] pid: %d\n", pid);
-    printk("[wake_up] set task = RUNNING: \n");
-    current->state = TASK_RUNNING;
-    printk("[wake_up] schedule: \n");
-    schedule();
+void wake_up_policy(unsigned long  data){
+    pid_t cur_pid = current->pid;
+    printk("[wake_up] cur_pid: %d\n", cur_pid);
+    pid_t wake_pid = (pid_t)data;
+    printk("[wake_up] pid to wake: %d\n", wake_pid);
+   // TODO: check pid
+    struct task_struct * p = find_task_by_pid(wake_pid);
+
+    printk("[wake_up] wake_up_process\n");
+    wake_up_process(p);
+    // printk("[wake_up] set task = RUNNING: \n");
+    // p->state = TASK_RUNNING;
+    // printk("[wake_up] set_tsk_need_resched \n");
+    // set_tsk_need_resched(p);
+    // schedule();
+}
+
+void kill_policy(unsigned long  data){
+    pid_t cur_pid = current->pid;
+    printk("[kill_policy] cur_pid: %d\n", cur_pid);
+    pid_t kill_pid = (pid_t)data;
+    printk("[kill_policy] pid to kill: %d\n", kill_pid);
+   // TODO: check pid
+    // struct task_struct * p = find_task_by_pid(kill_pid);
+    
+    // TODO: check if policy was changed
+    
+    siginfo_t info;
+    kill_proc_info(SIGKILL, &info,  kill_pid);
+    // schedule();
 }
 
 // sys_call handlers
@@ -106,41 +131,100 @@ int sys_set_policy(pid_t pid, int policy_id, int policy_value){
     }
 
     printk("[sys_set_policy] set policy: %d, value: %d in process: %d  task_struct \n", policy_id, policy_value, pid);
+    
+    int old_policy_id = p->policy_id;
+    int old_policy_value = p->policy_value;
     p->policy_id = policy_id;
     p->policy_value = policy_value;
+    printk("[sys_set_policy] old policy: %d, value: %d in process: %d  task_struct \n", old_policy_id, old_policy_value, pid);
+    printk("[sys_set_policy] set policy: %d, value: %d in process: %d  task_struct \n", policy_id, policy_value, pid);
 
     signed long jif_time = sec_to_jiffy(policy_value);
     printk("[sys_set_policy] policy_value: [seconds]: %d, [jiffy]: %d\n", policy_value, jif_time);
     // Handle set_policy curent process
     if (pid == current->pid){
         printk("[sys_set_policy] pid == current->pid\n");
+        
+        if(policy_id == 0){
+            if(old_policy_id == 2){
+                printk("[sys_set_policy] set_policy 0 - del timer");
+                del_timer(&p->real_timer);
+            }
+            else{
+                printk("[sys_set_policy] set_policy 0 - skip");                
+            }
+        }
+        
+        // if (policy_id == 1){
+        //     set_current_state(TASK_INTERRUPTIBLE);
+        //     printk("[sys_set_policy] schedule_timeout\n");
+        //     schedule_timeout(jif_time);
+        //     printk("[sys_set_policy] retrun 0 \n");
+        //     return 0;
+        // }
         if (policy_id == 1){
-            set_current_state(TASK_INTERRUPTIBLE);
-            printk("[sys_set_policy] schedule_timeout\n");
-            schedule_timeout(jif_time);
+            printk("[sys_set_policy] set p state to TASK_INTERRUPTIBLE\n");
+            p->state = TASK_INTERRUPTIBLE;
+            printk("[sys_set_policy] set_tsk_need_resched \n");
+            set_tsk_need_resched(p);
+            printk("[sys_set_policy] set wake_up timer\n");    
+            p->real_timer.expires = jiffies + jif_time;
+            p->real_timer.data = pid;
+            p->real_timer.function = wake_up_policy;
+            printk("[sys_set_policy] add wake_up timer to TS\n");
+            add_timer(&(p->real_timer));
             printk("[sys_set_policy] retrun 0 \n");
             return 0;
         }
         if (policy_id == 2){
-        
+            printk("[sys_set_policy] set kill timer\n");    
+            p->real_timer.expires = jiffies + jif_time;
+            p->real_timer.data = pid;
+            p->real_timer.function = kill_policy;
+            printk("[sys_set_policy] add kill timer to TS\n");
+            add_timer(&(p->real_timer));
+            printk("[sys_set_policy] retrun 0 \n");
+            return 0;
         }
     }
     // Handle set_policy to other process
     else{
         printk("[sys_set_policy] pid != current->pid\n");
+        
+  
+        if(policy_id == 0){
+            printk("[sys_set_policy] del timer");
+            del_timer(&p->real_timer);
+        }
+        
         if (policy_id == 1){
             printk("[sys_set_policy] set p state to TASK_INTERRUPTIBLE\n");
             p->state = TASK_INTERRUPTIBLE;
-            printk("[sys_set_policy] set wake_up timer\n");
             
+            printk("[sys_set_policy] set_tsk_need_resched \n");
+            set_tsk_need_resched(p);
+        
+            printk("[sys_set_policy] set wake_up timer\n");    
             p->real_timer.expires = jiffies + jif_time;
-            p->real_timer.data = 0;
-            p->real_timer .function = wake_up_policy;
-            printk("[sys_set_policy] set wake_up timer\n");
+            p->real_timer.data = pid;
+            p->real_timer.function = wake_up_policy;
+            printk("[sys_set_policy] add wake_up timer to TS\n");
             add_timer(&(p->real_timer));
             printk("[sys_set_policy] retrun 0 \n");
             return 0;
         }
+        
+        if(policy_id == 2){
+            printk("[sys_set_policy] set kill timer\n");    
+            p->real_timer.expires = jiffies + jif_time;
+            p->real_timer.data = pid;
+            p->real_timer.function = kill_policy;
+            printk("[sys_set_policy] add kill timer to TS\n");
+            add_timer(&(p->real_timer));
+            printk("[sys_set_policy] retrun 0 \n");
+            return 0;
+        }
+        
     }
 
 }

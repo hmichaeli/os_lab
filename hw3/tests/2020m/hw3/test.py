@@ -137,6 +137,7 @@ def test2():
             print("~~~~ test 2 passed ~~~~ ")
             return 0
         else:
+            print("~~~~ test 2 failed ~~~~ ")
             return 1
 
 def test3():
@@ -167,6 +168,7 @@ def test3():
             print("~~~~ test 3 passed ~~~~ ")
             return 0
         else:
+            print("~~~~ test 3 failed ~~~~ ")
             return 1
 
 
@@ -270,7 +272,7 @@ def test5():
             res = 1
             
         print ('intended ~10 second sleep , test time is %d' %(test_time))
-        print ('~~~~test 8 %s ~~~~~' %(result))
+        print ('~~~~test 5 %s ~~~~~' %(result))
         return res
         
 def test6():
@@ -473,8 +475,9 @@ def run_all_tests():
             res = os.wait()
             # print(type(res))
             # print(res)
-            print("test%d finished with res %d." %(i, res[1]))
-            if res !=0: total_score +=1
+            print("test%d finished with res %d." %(i, res[1])) #TODO: is this the right index to take? maybe res[0]?
+            if res !=0: 
+                total_score +=1
         
         time.sleep(2)
 

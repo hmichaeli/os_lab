@@ -43,29 +43,133 @@ def test_sleep():
 	assert (end_time-start_time > 10)
         assert (end_time-start_time < 20)
 
-def test0():
-    pass
 
-def test1():
+
+def test0():
     ''' put self to sleep '''
     pid = os.getpid()
     print("pid: ",pid)
     date_time = time.localtime()
     print("date and time:",date_time)	
-    t1 = date_time[5]
+    t1 = time.time()
     pyPolicy.set_policy(pid, 1, 10)
     date_time = time.localtime()
     print("date and time:",date_time)
-    t2 = date_time[5]
+    t2 = time.time()
     sleep_time = t2 - t1
-    if sleep_time == 10:
-        print("~~~~ test 1 passed ~~~~ ")
+    if sleep_time > 9 and sleep_time < 11:
+        print("sleep_time: %d, need to be: %d" %(sleep_time, 10))
+        print("~~~~ test 0 passed ~~~~ ")
         return 0
     else:
-        print("sleep_time: %d, nned to be: %d", sleep_time, 10)
+        print("sleep_time: %d, need to be: %d" %(sleep_time, 10))
+        return 1
 	
+def test1():
+    ''' parent send 2 policies 1 to child'''
+    pid = os.getpid()
+    print("[parent] pid: ", pid)
+    cpid = os.fork()
+    if (cpid == 0):
+        pid = os.getpid()
+        print("[child] pid: ", pid)
+        prev_time = time.time()            
+        max_sleep_time = 0
+        for i in range(20):
+            date_time = time.localtime()
+            log("[child]")
+            for k in xrange(2000000):
+                pass
+            
+            n_time = time.time()
+            if n_time - prev_time > max_sleep_time:
+                max_sleep_time = n_time - prev_time
+            prev_time = n_time
+
+        if max_sleep_time > 9 and max_sleep_time < 11:
+            print("sleep_time: %d, need to be: %d" %(max_sleep_time, 10))
+            print("~~~~ test 1 passed ~~~~ ")
+            os._exit(0)
+        else:
+            print("sleep_time: %d, need to be: %d" %(max_sleep_time, 10))
+            os._exit(1)
+
+    else:
+        time.sleep(3)
+        date_time = time.localtime()
+        log("[parent] set child policy [1]")
+        pyPolicy.set_policy(cpid, 1, 5)
+        time.sleep(1)
+        log("[parent] set child policy [2]")
+        pyPolicy.set_policy(cpid, 1, 5)
+        # debug_dmesg()
+        log("[parent] wait")
+        res = os.wait()
+        log("[parent] done")
+        return res
+
+
+
 
 def test2():
+    ''' fork pass sleep policy '''
+    pid = os.getpid()
+    log("[parent] pid: ", pid)
+    log("[parent] set self policy sleep")
+    t1 = time.time()
+    pyPolicy.set_policy(pid, 1, 5)
+    sleep_time1 = time.time() - t1 # need to be ~ 5
+    t2 = time.time()
+    cpid = os.fork()
+    if (cpid == 0):
+        # child do nothing but need to sleep 5 seconds
+        os._exit(0)
+    else:
+        log("[parent] child pid: ", cpid)
+        log("[parent] wait child:")
+       	os.wait()
+    	log("[parent] done:")
+        sleep_time2 = time.time() - t2
+
+        print("sleep_time1: %d, need to be: %d" %(sleep_time1, 5))
+        print("sleep_time2: %d, need to be: %d" %(sleep_time2, 5))
+        if sleep_time1 > 4 and sleep_time1 < 6 and sleep_time2 > 5 and sleep_time2 < 5:
+            print("~~~~ test 2 passed ~~~~ ")
+            return 0
+        else:
+            return 1
+
+def test3():
+    ''' fork pass kill policy, then parent rescued '''
+    pid = os.getpid()
+    log("[parent] pid: ", pid)
+    log("[parent] set self policy kill")
+    pyPolicy.set_policy(pid, 2, 5)
+    
+    t1 = time.time()
+    cpid = os.fork()
+    if (cpid == 0):
+        # child busy wait until get killed
+        for i in range(20):
+            log("[child]")
+            for k in xrange(10000000):
+                pass
+    else:
+        log("[parent] child pid: ", cpid)
+        pyPolicy.set_policy(pid, 0, 5)
+        log("[parent] wait child:")
+       	os.wait()
+    	log("[parent] done:")
+        sleep_time1 = time.time() - t1
+
+        print("sleep_time1: %d, need to be: %d" %(sleep_time1, 5))
+        if sleep_time1 > 4 and sleep_time1 < 6:
+            print("~~~~ test 3 passed ~~~~ ")
+            return 0
+        else:
+            return 1
+
+def test21():
     ''' put child to sleep '''
     pid = os.getpid()
     print("[parent] pid: ", pid)
@@ -96,7 +200,7 @@ def test2():
     	# print("[parent] done:",date_time)
 
 
-def test3():
+def test31():
     ''' policy 2 child '''
     pid = os.getpid()
     log("[parent] pid: ", pid)
@@ -114,7 +218,7 @@ def test3():
     else:
         time.sleep(3)
         log("[parent] set child policy date and time:")
-        pyPolicy.set_policy(cpid, 2, 10)
+        pyPolicy.set_policy(cpid, 2, 0)
     	# print("[parent] wait:",date_time)
         log("[parent] wait child:")
        	os.wait()
@@ -153,35 +257,8 @@ def test5():
        	os.wait()
     	log("[parent] done:")
 
+
 def test6():
-    ''' policy 1 to child twice '''
-    pid = os.getpid()
-    print("[parent] pid: ", pid)
-    cpid = os.fork()
-    if (cpid == 0):
-        pid = os.getpid()
-        print("[child] pid: ", pid)
-        for i in range(20):
-            date_time = time.localtime()
-            log("[child]")
-            for k in xrange(2000000):
-                pass
-
-        os._exit(0)
-    else:
-        time.sleep(3)
-        date_time = time.localtime()
-        log("[parent] set child policy [1]")
-        pyPolicy.set_policy(cpid, 1, 5)
-        time.sleep(1)
-        log("[parent] set child policy [2]")
-        pyPolicy.set_policy(cpid, 1, 5)
-        debug_dmesg()
-        log("[parent] wait")
-        os.wait()
-        log("[parent] done")
-
-def test7():
     """Verify rescue from terminate."""
     pid = os.getpid()
     print('Parent PID: %d' % os.getpid())
@@ -229,11 +306,19 @@ def test7():
     assert (end_time - start_time < 6)
 
 def run_all_tests():
+    # print(globals())
+    os.system('dmesg -c > /dev/null')
+    print("create new dmesg log")
+    os.system('echo test_dmesg_log > ./test_dmesg_log')
+
     total_score = 0
-    TEST_NUM = 7
+    TEST_NUM = 4
     for i in range(TEST_NUM):
-        print("run test %d", i)
-        locals()['test' + str(i)]
+        print("\n\n\n")
+        print("run test " + str(i))
+        globals()['test' + str(i)]()
+        os.system('echo test ' + str(i)+ '  > ./test_dmesg_log')
+        os.system('dmesg -c > ./test_dmesg_log')
 
 
 
@@ -244,6 +329,7 @@ if __name__ == "__main__":
     # test3()
     # test5()
     # test6()
+    # run_all_tests()
    # test_sleep()
 
 

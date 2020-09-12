@@ -304,6 +304,118 @@ def test6():
     print('end_time-start_time: %d' % (end_time - start_time))
     assert (end_time - start_time >= 3)
     assert (end_time - start_time < 6)
+	
+def test8():
+    ''' multiple sleeps '''
+    pid = os.getpid()
+    print("[parent] pid: ", pid)
+    cpid = os.fork()
+    if (cpid == 0):
+        pid = os.getpid()
+		ppid = os.get_ppid()
+        print("[child] pid: ", pid)
+        while True:
+            date_time = time.localtime()
+            log("[child] set sleep policy on dad ppid:",ppid)
+			pyPolicy.set_policy(ppid,1,2)
+            for k in xrange(2000000):
+                pass
+
+        os._exit(0)
+    else:
+        time.sleep(3)
+        start_time = time.time()
+		for i in range(5):
+			log("[parent] set child policy [1]")
+			pyPolicy.set_policy(cpid, 1, 5)
+			time.sleep(1)
+        log("[parent] wait")
+        os.wait()
+        log("[parent] done")
+		end_time = time.time()
+		test_time = int(end_time-start_time)
+		
+		print('[parent] kill child, pid: ',pid)
+		pyPolicy.set_policy(pid,2,0)
+		print('[parent]done ',pid)
+		if  test_time > 5 && test_time < 11:
+			result = "passed"
+		else
+			result = "failed"
+			
+		print ('intended ~10 second sleep , test time is %d'.format(test_time))
+		print ('~~~~test 8 %s ~~~~~'.format(result))
+		
+def test9():
+    ''' set terminate to self, fork to child, child must die, rescue self.'''
+    pid = os.getpid()
+    print("[parent] pid: ", pid)
+	start_time = time.time()
+	pyPolicy.set_policy(pid,2,10)
+    cpid = os.fork()
+    if (cpid == 0):
+        pid = os.getpid()
+		ppid = os.get_ppid()
+        print("[child] pid: ", pid)
+        for i in range(20):
+			myPolicy = pyPolicy.get_policy(pid)
+			print("[child] my policy is(policy,val):", myPolicy)
+            time.sleep(1)
+        os._exit(0)
+    else:
+		myPolicy = pyPolicy.get_policy(pid)
+		print("[parent] child policy is(policy,val):", myPolicy)
+		time.sleep(3)
+		log("[parent] save myself")
+		pyPolicy.set_policy(pid,0,0)
+        os.wait()
+        log("[parent] done")
+		end_time = time.time()
+		test_time = int(end_time-start_time)
+		
+		if  test_time > 8 && test_time < 11:
+			result = "passed"
+		else
+			result = "failed"
+			
+		print ('intended ~10 second untill child dies , test time is %d'.format(test_time))
+		print ('~~~~test 9 %s ~~~~~'.format(result))
+
+def test10():
+    ''' set sleep to self, fork to child, set more sleep to child.'''
+    pid = os.getpid()
+    print("[parent] pid: ", pid)
+	start_time = time.time()
+	pyPolicy.set_policy(pid,1,5)
+	log("[parent] forking to child, he should sleep for 5 sec")
+    cpid = os.fork()
+    if (cpid == 0):
+        pid = os.getpid()
+        print("[child] pid: ", pid)
+        for i in range(5):
+			log("[child]")
+            time.sleep(1)
+        os._exit(0)
+    else:
+		myPolicy = pyPolicy.get_policy(pid)
+		print("[parent] child policy is(policy,val):", myPolicy)
+		time.sleep(2)
+		sleep_time = 5
+		log("[parent] set child to sleep more time:",sleep_time)
+		pyPolicy.set_policy(cpid,1,sleep_time)
+        os.wait()
+        log("[parent] finished waiting")
+		end_time = time.time()
+		test_time = int(end_time-start_time)
+		
+		if  test_time > 20-2 && test_time < 20+2:
+			result = "passed"
+		else
+			result = "failed"
+			
+		print ('intended ~20 second untill child dies (5parent sleep + 5 child + 5 child + 5 print  , test time is %d'.format(test_time))
+		print ('~~~~test 10 %s ~~~~~'.format(result))
+
 
 def run_all_tests():
     # print(globals())

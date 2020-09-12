@@ -56,11 +56,14 @@ void wake_up_policy(unsigned long  data){
     printk("[wake_up] pid to wake: %d\n", wake_pid);
    // TODO: check pid
     struct task_struct * p = find_task_by_pid(wake_pid);
+    printk("[wake_up] get task_struct. policy_id: %d policy_value: %d\n", p->policy_id, p->policy_value);
 
     printk("[wake_up] wake_up_process\n");
     wake_up_process(p);
+    printk("[wake_up] post wake_up_process. policy_id: %d policy_value: %d\n", p->policy_id, p->policy_value);
 
     if(p->pending_policy_id != -1){
+        printk("[wake_up] there is a pending policy\n");
         p->policy_id = p->pending_policy_id;
         p->policy_value = p->pending_policy_value;
         p->pending_policy_id = -1;

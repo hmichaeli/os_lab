@@ -567,7 +567,10 @@ extern struct exec_domain	default_exec_domain;
     alloc_lock:		SPIN_LOCK_UNLOCKED,				\
     journal_info:	NULL,						\
 	policy_id: 		0,							\
-	policy_value: 	0, 						\				
+	policy_value: 	0, 						\
+	active_policy: 1,				\
+	pending_policy_id: -1,				\
+	pending_policy_value: -1,				\
 }
 
 
